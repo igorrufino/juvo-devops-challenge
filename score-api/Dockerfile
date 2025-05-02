@@ -15,7 +15,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Copiar o arquivo requirements.txt primeiro para otimizar o cache do Docker
+# Copiar o arquivo requirements.txt primeiro para otimizar o cache do Docker. Isso evita que as dependências sejam reinstaladas toda vez que o código mudar.
 COPY requirements.txt .
 
 # Instalar as dependências do Python
