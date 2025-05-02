@@ -46,8 +46,8 @@ jobs:
           cd ..  # Voltar para o diretório raiz do repositório
           
           # Substitua o valor da imagem no arquivo deployment.yaml
-          sed -i "s|igorufino/score-api:latest|${{ secrets.DOCKER_USERNAME }}/score-api:${{ github.sha }}|g" kubernetes/deployment/score-api/deployment.yaml
-          
+          sed -i "s|igorufino/score-api:[a-zA-Z0-9._-]*|${{ secrets.DOCKER_USERNAME }}/score-api:${{ github.sha }}|g" kubernetes/deployment/score-api/deployment.yaml
+    
           # Configure Git
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@github.com'
