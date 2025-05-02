@@ -59,38 +59,38 @@ jobs:
           # Faça push das alterações
           git push
 
-  # deploy-score-api:
-  #   name: "Deploy Score API to EKS"
-  #   runs-on: "ubuntu-latest"
-  #   needs: build
+  deploy-score-api:
+    name: "Deploy Score API to EKS"
+    runs-on: "ubuntu-latest"
+    needs: build
 
-  #   steps:
-  #     - name: "Checkout Repository"
-  #       uses: actions/checkout@v4
-  #       with:
-  #         ref: 'main'  # Garante que estamos obtendo a versão mais recente após o commit feito no job anterior
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          ref: 'main'  # Garante que estamos obtendo a versão mais recente após o commit feito no job anterior
 
-  #     - name: "Configure AWS Credentials" 
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         aws-region: us-east-1
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: "Configure AWS Credentials" 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-  #     - name: "Configure Kubernetes Context"
-  #       run: |
-  #         aws eks --region us-east-1 update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
+      - name: "Configure Kubernetes Context"
+        run: |
+          aws eks --region us-east-1 update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
 
-  #     - name: "Apply score-api"
-  #       run: |
-  #         echo "Removendo score-api existente..."
-  #         kubectl delete -f kubernetes/deployment/score-api/deployment.yaml --ignore-not-found=true
-  #         kubectl delete -f kubernetes/deployment/score-api/service.yaml --ignore-not-found=true
+      - name: "Apply score-api"
+        run: |
+          echo "Removendo score-api existente..."
+          kubectl delete -f kubernetes/deployment/score-api/deployment.yaml --ignore-not-found=true
+          kubectl delete -f kubernetes/deployment/score-api/service.yaml --ignore-not-found=true
 
-  #         echo "Aplicando score-api..."
-  #         kubectl apply -f kubernetes/deployment/score-api/deployment.yaml
-  #         kubectl apply -f kubernetes/deployment/score-api/service.yaml
+          echo "Aplicando score-api..."
+          kubectl apply -f kubernetes/deployment/score-api/deployment.yaml
+          kubectl apply -f kubernetes/deployment/score-api/service.yaml
 
-  #         # Verificar recursos aplicados
-  #         kubectl get deployments -n score-api
-  #         kubectl get services -n score-api
+          # Verificar recursos aplicados
+          kubectl get deployments -n score-api
+          kubectl get services -n score-api
