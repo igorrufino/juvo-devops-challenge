@@ -19,7 +19,7 @@ spec:
       - name: regcred  
       containers:
       - name: score-api
-        image: igorrufino/score-api:dfcf15501a2a679206bf51033284d57e15aa6a1e
+        image: igorrufino/score-api:3d9cc8b6995c7ea4b9ce63d2ee45c847b545c3db
         ports:
         - containerPort: 8000
         resources:
