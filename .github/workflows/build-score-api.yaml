@@ -1,0 +1,84 @@
+# Este arquivo é um de um workflow do GitHub Actions para construir e implantar uma imagem Docker de uma API de pontuação em um cluster EKS na AWS.
+# Ele é acionado quando há um push na branch main ou quando é executado manualmente.
+# O workflow constrói a imagem Docker, faz o login no DockerHub, empurra a imagem e implanta a API de pontuação no EKS.
+name: "Build and Push Docker Image - Score API"
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'score-api/**/*'
+      - 'kubernetes/deployment/score-api/**'
+      - '!score-api/README.md'
+      - '!score-api/docs/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: score-api
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./score-api
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/score-api:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/score-api:cache
+      # Na seção "Build and push Docker image"
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./score-api
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/score-api:${{ github.sha }}
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/score-api:cache
+
+
+
+  deploy-score-api:
+    name: "Deploy Score API to EKS"
+    runs-on: "ubuntu-latest"
+    needs: build
+
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "Configure AWS Credentials" 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: "Configure Kubernetes Context"
+        run: |
+          aws eks --region us-east-1 update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+      - name: "Apply store-api"
+        run: |
+          echo "Removendo store-api..."
+          kubectl delete -f kubernetes/deployment/score-api/deployment.yaml --ignore-not-found=true
+          kubectl delete -f kubernetes/deployment/score-api/service.yaml --ignore-not-found=true
+
+          echo "Aplicando store-api..."
+          kubectl apply -f kubernetes/deployment/score-api/deployment.yaml
+          kubectl apply -f kubernetes/deployment/score-api/service.yaml
+
+          # Verificar recursos aplicados
+          kubectl get deployments -n score-api
+          kubectl get services -n score-api

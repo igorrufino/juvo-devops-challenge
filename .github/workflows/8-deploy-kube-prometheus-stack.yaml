@@ -1,0 +1,49 @@
+# Este arquivo é um de um workflow do GitHub Actions para implantar o Prometheus Stack em um cluster EKS na AWS.
+# Ele é acionado quando há um push na branch main ou quando é executado manualmente.
+# O workflow configura as credenciais da AWS, faz o checkout do repositório, configura o contexto do Kubernetes e implanta o Prometheus Stack usando o Helm.
+name: "8 - Deploy Prometheus Stack"
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["kubernetes/monitoring/prometheus.yaml"]
+  workflow_dispatch:
+
+jobs:
+  deploy-prometheus:
+    name: "Deploy Prometheus Stack"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "Configure AWS Credentials" 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: "Configure Kubernetes Context"
+        run: |
+          aws eks --region us-east-1 update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+      - name: "Create monitoring namespace if not exists"
+        run: |
+          kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: "Add Helm repositories"
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
+
+      - name: "Install Prometheus Stack"
+        run: |
+          echo "Instalando Prometheus Stack..."
+          helm upgrade --install prometheus prometheus-community/kube-prometheus-stack --version 70.4.1 -f kubernetes/monitoring/prometheus.yaml --namespace monitoring
+          
+      - name: "Verify Prometheus Deployments"
+        run: |
+          kubectl get pods -n monitoring -l app=prometheus
+          kubectl get pods -n monitoring -l app=grafana

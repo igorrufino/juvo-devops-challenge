@@ -1,0 +1,38 @@
+# Este arquivo é um de um workflow do GitHub Actions para aplicar configurações de namespaces em um cluster EKS na AWS.
+# Ele é acionado quando há um push na branch main ou quando é executado manualmente.
+# O workflow configura as credenciais da AWS, faz o checkout do repositório, configura o contexto do Kubernetes e aplica os recursos de namespace.
+# O arquivo assume que as credenciais da AWS estão armazenadas como segredos no repositório do GitHub.
+
+name: "3 - Deploy Namespaces"
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["kubernetes/namespaces/**"]
+  workflow_dispatch:
+
+jobs:
+  deploy-namespaces:
+    name: "Deploy Namespaces"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "Configure AWS Credentials" 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: "Configure Kubernetes Context"
+        run: |
+          aws eks --region us-east-1 update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+      - name: "Apply Namespace Resources"
+        run: |
+          echo "Aplicando recursos de Namespace..."
+          kubectl apply -f kubernetes/namespaces/
+          kubectl get namespaces
