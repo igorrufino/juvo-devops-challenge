@@ -43,21 +43,31 @@ jobs:
 
       - name: Update deployment file with current SHA
         run: |
-          cd ..  # Voltar para o diretório raiz do repositório
+          cd ..     
+          echo "Conteúdo atual do arquivo:"
+          cat kubernetes/deployment/score-api/deployment.yaml
+                    
+          sed -i -E 's|(image: *igorrufino/score-api:)[a-zA-Z0-9._-]*|\1${{ github.sha }}|g' kubernetes/deployment/score-api/deployment.yaml         
+          echo "Nova imagem no deployment:"
+          grep -A1 "name: score-api" kubernetes/deployment/score-api/deployment.yaml | tail -1
           
-          # Substitua o valor da imagem no arquivo deployment.yaml
-          sed -i "s|igorufino/score-api:[a-zA-Z0-9._-]*|${{ secrets.DOCKER_USERNAME }}/score-api:${{ github.sha }}|g" kubernetes/deployment/score-api/deployment.yaml
-    
-          # Configure Git
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'github-actions@github.com'
-          
-          # Adicione e faça commit das alterações
-          git add kubernetes/deployment/score-api/deployment.yaml
-          git commit -m "Update score-api image to version ${{ github.sha }}"
-          
-          # Faça push das alterações
-          git push
+          # Verifique se houve mudanças
+          if git diff --quiet kubernetes/deployment/score-api/deployment.yaml; then
+            echo "Nenhuma alteração foi feita no arquivo. Verificando o formato exato..."
+            grep -A2 "containers:" kubernetes/deployment/score-api/deployment.yaml
+            echo "Pulando o commit pois não há alterações."
+          else
+            # Configure Git e faça o commit
+            git config --global user.name 'GitHub Actions'
+            git config --global user.email 'github-actions@github.com'
+            git add kubernetes/deployment/score-api/deployment.yaml
+            git commit -m "Update score-api image to version ${{ github.sha }}"
+            git push
+          fi
+
+
+
+
 
   deploy-score-api:
     name: "Deploy Score API to EKS"
