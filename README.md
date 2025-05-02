@@ -4,6 +4,8 @@ Este repositório contém uma implementação completa de infraestrutura como c�
 
 ## 📋 Visão Geral
 
+![Arquitetura Atual](docs/images/arquiteturaautalqui.jpg)
+
 Este projeto implementa uma infraestrutura completa que inclui:
 
 - Criação de VPC, subnets e recursos de rede na AWS via Terraform
