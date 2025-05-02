@@ -1,0 +1,86 @@
+# Values para o Loki usando o MinIO como backend de armazenamento S3
+deploymentMode: "SimpleScalable"
+loki:
+  auth_enabled: false
+  useTestSchema: true
+  storage:
+    type: s3
+    bucketNames:
+      chunks: loki
+      ruler: loki
+      admin: loki
+    s3:
+      endpoint: minio.monitoring.svc.cluster.local:9000
+      insecure: true
+      s3forcepathstyle: true
+      access_key_id: root
+      secret_access_key: supersecret80k
+  commonConfig:
+    replication_factor: 1
+
+  limits_config:
+    max_global_streams_per_user: 10000
+    max_streams_per_user: 10000
+    reject_old_samples: false
+    retention_period: 8760h
+    per_stream_rate_limit: 10MB
+    per_stream_rate_limit_burst: 10MB
+    max_query_parallelism: 90
+    ingestion_rate_mb: 16384
+    ingestion_burst_size_mb: 16384
+
+compactor:
+  apply_retention_interval: 1h
+  compaction_interval: 10m
+  retention_delete_delay: 2h
+  retention_delete_worker_count: 150
+  retention_enabled: true
+  shared_store: s3
+  working_directory: /var/loki/compactor
+
+ingester:
+  max_transfer_retries: 1
+  chunk_idle_period: 1h
+  chunk_target_size: 1536000
+  max_chunk_age: 1h
+  chunk_encoding: snappy
+
+test:
+  enabled: false
+
+lokiCanary:
+  enabled: false
+
+indexGateway:
+  enabled: true
+
+write:
+  replicas: 1
+  persistence:
+    enabled: false
+
+read:
+  replicas: 1
+  persistence:
+    enabled: false
+
+backend:
+  replicas: 1
+  persistence:
+    enabled: false
+
+memcachedChunks:
+  enabled: true
+  extraArgs:
+    - -I 32m
+
+chunksCache:
+  enabled: true
+  port: 11211
+  allocatedMemory: 256
+  maxItemMemory: 1
+  connectionLimit: 1024
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi

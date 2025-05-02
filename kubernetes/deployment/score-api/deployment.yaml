@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: score-api
+  labels:
+    app: score-api
+  namespace: score-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: score-api
+  template:
+    metadata:
+      labels:
+        app: score-api
+    spec:
+      imagePullSecrets:
+      - name: regcred  
+      containers:
+      - name: score-api
+        image: igorufino/score-api:latest
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: "score-api"
+    labels:
+      name: "score-api"
+      istio-injection: "disabled"

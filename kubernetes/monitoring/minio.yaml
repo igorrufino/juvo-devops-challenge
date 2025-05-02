@@ -1,0 +1,27 @@
+mode: standalone
+rootUser: root
+rootPassword: supersecret80k
+buckets:
+  - name: loki
+    policy: none
+    purge: false
+    lifecycle:
+      - id: expire-loki-data
+        status: Enabled
+        expiry:
+          days: 7
+  - name: tempo
+    policy: none
+    purge: false
+    lifecycle:
+      - id: expire-tempo-data
+        status: Enabled
+        expiry:
+          days: 7
+persistence: 
+  size: 1Gi
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+user: []

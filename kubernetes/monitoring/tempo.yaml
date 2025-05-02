@@ -1,0 +1,31 @@
+distributor:
+  config: {}
+
+ingester:
+  replicas: 1
+  config:
+    replication_factor: 1
+
+querier:
+  replicas: 1
+  config:
+    frontend_worker:
+      frontend_address: tempo-query-frontend-discovery.monitoring.svc.cluster.local:9095
+
+traces:
+  otlp:
+    http:
+      enabled: true
+    grpc:
+      enabled: true
+
+storage:
+  trace:
+    backend: s3
+    s3:
+      bucket: tempo
+      endpoint: minio.monitoring.svc.cluster.local:9000
+      access_key: root
+      secret_key: supersecret80k
+      insecure: true
+      forcepathstyle: true

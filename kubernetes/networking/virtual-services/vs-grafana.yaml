@@ -1,0 +1,17 @@
+# Este arquivo é um VirtualService do Istio para o Grafana. Ele define um serviço virtual que direciona o tráfego para o Grafana em um cluster Kubernetes. O VirtualService é configurado para usar um gateway específico e direcionar o tráfego para o serviço do Grafana na porta 80.
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: grafana-vs
+  namespace: istio-system
+spec:
+  hosts:
+  - "grafana.score-api.com.br"
+  gateways:
+  - gateway
+  http:
+  - route:
+    - destination:
+        host: prometheus-grafana.monitoring.svc.cluster.local
+        port:
+          number: 80  

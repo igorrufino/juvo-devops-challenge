@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+  namespace: score-api
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJodHRwczovL2luZGV4LmRvY2tlci5pby92MS8iOnsidXNlcm5hbWUiOiJpZ29ycnVmaW5vIiwicGFzc3dvcmQiOiJkY2tyX3BhdF9ablVxUDJjWFRQc21Kc1Y0a19SRXpZWE9md0EiLCJlbWFpbCI6Imlnb3IucnVmaW5vZG9zc2FudG9zQGdtYWlsLmNvbSIsImF1dGgiOiIifX19
+type: kubernetes.io/dockerconfigj
