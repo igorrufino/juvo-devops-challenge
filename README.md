@@ -4,7 +4,7 @@ Este repositório contém uma implementação completa de infraestrutura como c�
 
 ## 📋 Visão Geral
 
-![Arquitetura Atual](docs/images/arquiteturaautalqui.jpg)
+![Arquitetura Atual](docs/images/arquitetura-atual.jpg)
 
 Este projeto implementa uma infraestrutura completa que inclui:
 
