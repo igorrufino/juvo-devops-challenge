@@ -1,0 +1,44 @@
+# Este arquivo é um de um workflow do GitHub Actions para instalar o Istio em um cluster EKS na AWS.
+# Ele é acionado manualmente através do GitHub Actions.
+# O workflow configura as credenciais da AWS, faz o checkout do repositório, configura o contexto do Kubernetes e instala o Istio.
+# Precisa colocar o nome do cluster EKS e a região AWS correta.
+# O arquivo assume que as credenciais da AWS estão armazenadas como segredos no repositório do GitHub.
+
+name: "2 - Install Istio"
+
+on:
+  workflow_dispatch: 
+  
+jobs:
+  install-istio:
+    name: "Install Istio"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "Configure AWS Credentials" 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: "Configure Kubernetes Context"
+        run: |
+          aws eks --region us-east-1 update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
+
+      - name: "Install Istio"
+        run: |
+          # Usar versão fixa 1.23.2
+          echo "Downloading Istio 1.23.2..."
+          curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.23.2 sh -
+          
+          # Usar diretório fixo
+          echo "Installing Istio with default profile..."
+          cd istio-1.23.2
+          ./bin/istioctl install --set profile=default -y
+          
+          echo "Verifying Istio installation..."
+          kubectl get pods -n istio-system
